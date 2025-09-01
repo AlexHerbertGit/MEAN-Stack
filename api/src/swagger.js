@@ -9,7 +9,7 @@ const options = {
     info: {
       title: 'Kobra Kai Charity API',
       version: '1.0.0',
-      description: 'MERN prototype for Auth (JWT), Meals, and Orders',
+      description: 'MEAN prototype for Auth (JWT), Meals, and Orders', 
     },
     servers: [{ url: 'http://localhost:4000/api' }],
     tags: [
