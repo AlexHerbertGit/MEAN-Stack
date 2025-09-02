@@ -1,0 +1,9 @@
+*{box-sizing:border-box} body,html{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+.nav{display:flex;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid #eee;background:#fafafa}
+.nav a{text-decoration:none;color:#0366d6}
+.nav .right{margin-left:auto;display:flex;gap:10px}
+main{padding:16px}
+.card, form{max-width:560px;margin:16px auto;padding:12px;border:1px solid #eee;border-radius:8px;background:#fff}
+input,select,button{display:block;width:100%;margin:8px 0;padding:8px}
+button{cursor:pointer}
+pre{background:#f7f7f7;padding:8px;border-radius:6px;overflow:auto}
