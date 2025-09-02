@@ -3,6 +3,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// User Authentication Verification and Validation
 async function authRequired(req, res, next) {
     try {
         const bearer = req.headers.authorization?.startsWith('Bearer ')

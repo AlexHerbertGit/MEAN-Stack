@@ -2,6 +2,7 @@
 
 const mongoose = require('mongoose');
 
+// Order Schema
 const OrderSchema = new mongoose.Schema({
   mealId: { type: mongoose.Schema.Types.ObjectId, ref: 'Meal', required: true },
   beneficiaryId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

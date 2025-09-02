@@ -2,6 +2,7 @@
 
 const mongoose = require('mongoose');
 
+// Meal Schema
 const MealSchema = new mongoose.Schema({
   memberId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   title: { type: String, required: true },
