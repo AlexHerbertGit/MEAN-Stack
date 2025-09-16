@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, Me } from '../core/auth.service';
 
+// Minimal dashboard that displays the authenticated user object.
+// Useed for verifying role-based behaviour.
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -15,6 +18,8 @@ import { AuthService, Me } from '../core/auth.service';
   `
 })
 export class DashboardComponent {
-  me: Me | null = null;
-  constructor(private auth: AuthService) { this.auth.me$.subscribe(m => this.me = m); }
+  me: Me | null = null; // Holds the latest "me" snapshot from AuthService
+  constructor(private auth: AuthService) { 
+    // Subscribe to auth state stream; any changes update the view automatically
+    this.auth.me$.subscribe(m => this.me = m); }
 }

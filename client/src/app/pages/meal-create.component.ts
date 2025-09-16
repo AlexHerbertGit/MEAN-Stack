@@ -20,15 +20,20 @@ import { MealsService } from '../core/meals.service';
   `
 })
 export class MealCreateComponent {
+  // Form model (template-driven): strings bound by ngModel
   title=''; description=''; dietaryTags=''; portionsAvailable:any = 0; result:any;
   constructor(private meals: MealsService) {}
+  // On submit, shape data to match API contract and call MealsService.create(...)
   submit(){
     const payload = {
       title:this.title,
       description:this.description,
+       // Split comma-separated tags into an array and trim whitespace
       dietaryTags: this.dietaryTags ? this.dietaryTags.split(',').map(s=>s.trim()) : [],
+      // Force number to avoid sending a string to the API
       portionsAvailable: Number(this.portionsAvailable || 0)
     };
+    // Subscribe to the HTTP Observable; stash either the response or error to display
     this.meals.create(payload).subscribe({ next:r=>this.result=r, error:e=>this.result=e?.error||e });
   }
 }

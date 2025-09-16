@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrdersService } from '../core/orders.service';
 
+// Minimal form to place an order given a Meal ID.
+
 @Component({
   selector: 'app-order-place',
   standalone: true,
@@ -17,7 +19,10 @@ import { OrdersService } from '../core/orders.service';
   `
 })
 export class OrderPlaceComponent {
-  mealId=''; result:any;
+  mealId=''; // Two-way bound meal id input
+  result:any; // Displays API response or error
   constructor(private orders: OrdersService) {}
+
+   // POST to /orders with the selected meal id
   submit(){ this.orders.placeOrder(this.mealId).subscribe({ next:r=>this.result=r, error:e=>this.result=e?.error||e }); }
 }
