@@ -8,6 +8,7 @@ import { AuthService } from '../core/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
+  <!-- Simple template-driven login form -->
   <form (ngSubmit)="submit()">
     <h2>Login</h2>
     <input [(ngModel)]="email" name="email" type="email" placeholder="Email" required>
@@ -18,8 +19,17 @@ import { AuthService } from '../core/auth.service';
   `
 })
 export class LoginComponent {
-  email = ''; password = ''; result: any;
+  // Two-way bound by the template inputs above
+  email = ''; password = ''; 
+  // For showing the response/error below the form
+  result: any;
+
   constructor(private auth: AuthService) {}
+  /**
+   * Submit credentials to the API.
+   * On success, AuthService will refresh 'me' (server session/JWT),
+   * which updates UI that subscribes to me$ (e.g., nav/dashboard).
+   */
   submit() {
     this.auth.login(this.email, this.password).subscribe({
       next: r => this.result = r,

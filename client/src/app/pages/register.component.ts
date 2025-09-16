@@ -24,8 +24,17 @@ import { AuthService, Role } from '../core/auth.service';
   `
 })
 export class RegisterComponent {
-  name=''; email=''; password=''; role: Role = 'beneficiary'; address=''; result:any;
+  // Two-way bound fields
+  name=''; email=''; password=''; role: Role = 'beneficiary'; address=''; 
+  // Show API result or error
+  result:any;
+
   constructor(private auth: AuthService) {}
+  /**
+   * Submit registration payload to the server.
+   * On success, AuthService triggers refreshMe(), me$ emits,
+   * and the UI can react (e.g., navigate to dashboard).
+   */
   submit() {
     this.auth.register({ name:this.name, email:this.email, password:this.password, role:this.role, address:this.address })
       .subscribe({ next:r=>this.result=r, error:e=>this.result=e?.error||e });
