@@ -7,3 +7,13 @@ main{padding:16px}
 input,select,button{display:block;width:100%;margin:8px 0;padding:8px}
 button{cursor:pointer}
 pre{background:#f7f7f7;padding:8px;border-radius:6px;overflow:auto}
+.logout-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;
+  text-decoration: underline;
+}

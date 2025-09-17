@@ -15,8 +15,8 @@ import { MealsService, Meal } from '../core/meals.service';
     <div *ngFor="let m of meals" class="card">
       <strong>{{ m.title }}</strong>
       <div>{{ m.description }}</div>
-      <div>Portions: {{ m.portionsAvailable }}</div>
-      <div>Dietary: {{ m.dietaryTags?.join(', ') }}</div>
+      <div>Portions: {{ m.qtyAvailable }}</div>
+      <div>Dietary: {{ m.dietary?.join(', ') }}</div>
       <small>ID: {{ m._id }}</small>
     </div>
   </div>

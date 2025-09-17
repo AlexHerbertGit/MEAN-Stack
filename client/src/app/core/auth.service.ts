@@ -1,82 +1,80 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, tap } from 'rxjs';
-import { ApiService } from './api.service';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { tap, catchError, switchMap } from 'rxjs/operators';
 
-/**
- * AuthService
- * ------------
- * Responsibility:
- * - Talks to the backend /api/auth endpoints for register + login.
- * - Stores the JWT so it can be attached by the HTTP interceptor on future requests.
- * - Exposes simple "isLoggedIn" and "currentUser" state for the UI (navbar, guards, etc.).
- */
-
-export type Role = 'beneficiary' | 'member';
 export interface Me {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   role: Role;
-  tokenBalance?: number;
 }
+
+// ⬅️ Export a Role type so components can import it.
+export type Role = 'beneficiary' | 'member' | 'admin';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  /**
-   * Current user state as an observable stream.
-   * Components can subscribe to react to login/logout immediately.
-   * null means "not authenticated".
-   */
-  me$ = new BehaviorSubject<Me | null>(null);
+  private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  constructor(private api: ApiService) {
-    /**
-     * On app startup try to restore the session by asking the server who we are.
-     * If the backend uses a cookie-based session/JWT, withCredentials in ApiService
-     * ensures the cookie is sent and /auth/me can return the logged-in user.
-     */
-    this.refreshMe().subscribe({ error: () => {} });
-  }
+  private meSubject = new BehaviorSubject<Me | null>(null);
+  public me$ = this.meSubject.asObservable();
 
-  /**
-   * Register a new user.
-   * POST /auth/register with the required fields.
-   * On success, immediately refresh the "me" state so the UI updates.
-   */
-  register(payload: { name: string; email: string; password: string; role: Role; address?: string }) {
-    return this.api.post('/auth/register', payload).pipe(
-      tap(() => this.refreshMe().subscribe())
+  /** Query current user via cookie-based auth */
+  refreshMe(): Observable<Me | null> {
+    return this.http.get<Me>('http://localhost:4000/api/auth/me', { withCredentials: true }).pipe(
+      tap((m) => this.meSubject.next(m)),
+      catchError(() => { this.meSubject.next(null); return of(null); })
     );
   }
 
-  /**
-   * Log in an existing user.
-   * POST /auth/login with email/password.
-   * On success, refresh "me" so subscribers (e.g., navbars/guards) react.
-   */
-  login(email: string, password: string) {
-    return this.api.post('/auth/login', { email, password }).pipe(
-      tap(() => this.refreshMe().subscribe())
+  /** Server-side logout (clears HttpOnly JWT cookie) */
+  logout(): Observable<{ ok: boolean }> {
+    return this.http.post<{ ok: boolean }>(
+      'http://localhost:4000/api/auth/logout',
+      {},
+      { withCredentials: true }
+    ).pipe(
+      tap(() => this.meSubject.next(null)),
+      catchError(() => { this.meSubject.next(null); return of({ ok: false } as any); })
     );
   }
 
-  /**
-   * Log out the current user.
-   * POST /auth/logout to invalidate the server-side session/JWT.
-   * Then set me$ to null locally so the app hides protected UI.
-   */
-  logout() {
-    return this.api.post('/auth/logout', {}).pipe(
-      tap(() => this.me$.next(null))
+  // ⬇️ NEW: login helper expected by login.component.ts
+  login(email: string, password: string): Observable<Me | null> {
+    return this.http.post<{ ok: boolean }>(
+      'http://localhost:4000/api/auth/login',
+      { email, password },
+      { withCredentials: true }
+    ).pipe(
+      // on success, re-fetch /me so UI gets the profile
+      switchMap(() => this.refreshMe())
     );
   }
 
-  /**
-   * Ask the server who the current user is.
-   * If authenticated, server returns Me; otherwise it will error (handled by caller).
-   * The tap ensures me$ always reflects the latest identity.
-   */
-  refreshMe() {
-    return this.api.get<Me>('/auth/me').pipe(tap(m => this.me$.next(m)));
+  // ⬇️ NEW: register helper expected by register.component.ts
+  register(payload: { name: string; email: string; password: string; role: Role }): Observable<Me | null> {
+    return this.http.post<{ ok: boolean }>(
+      'http://localhost:4000/api/auth/register',
+      payload,
+      { withCredentials: true }
+    ).pipe(
+      // many APIs auto-login after register; if yours doesn’t, you can remove this
+      switchMap(() => this.refreshMe())
+    );
+  }
+
+  /** Optional: dev helper to clear stale cookie once per page load */
+  forceLogoutOnBoot(): void {
+    if (!this.isBrowser) return;
+    const FLAG = 'dev:logout-cleared-on-boot';
+    if (sessionStorage.getItem(FLAG)) return;
+    sessionStorage.setItem(FLAG, '1');
+    this.http.post('http://localhost:4000/api/auth/logout', {}, { withCredentials: true })
+      .pipe(catchError(() => of(null)))
+      .subscribe(() => this.meSubject.next(null));
   }
 }

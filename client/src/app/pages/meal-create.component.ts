@@ -12,8 +12,8 @@ import { MealsService } from '../core/meals.service';
     <h2>Create Meal (Member)</h2>
     <input [(ngModel)]="title" name="title" placeholder="Title" required>
     <input [(ngModel)]="description" name="description" placeholder="Description">
-    <input [(ngModel)]="dietaryTags" name="dietaryTags" placeholder="Dietary tags (comma separated)">
-    <input [(ngModel)]="portionsAvailable" name="portionsAvailable" type="number" min="0" placeholder="Portions">
+    <input [(ngModel)]="dietary" name="dietary" placeholder="Dietary tags (comma separated)">
+    <input [(ngModel)]="qtyAvailable" name="qtyAvailable" type="number" min="0" placeholder="Portions">
     <button>Create</button>
   </form>
   <pre *ngIf="result">{{ result | json }}</pre>
@@ -21,7 +21,7 @@ import { MealsService } from '../core/meals.service';
 })
 export class MealCreateComponent {
   // Form model (template-driven): strings bound by ngModel
-  title=''; description=''; dietaryTags=''; portionsAvailable:any = 0; result:any;
+  title=''; description=''; dietary=''; qtyAvailable:any = 0; result:any;
   constructor(private meals: MealsService) {}
   // On submit, shape data to match API contract and call MealsService.create(...)
   submit(){
@@ -29,9 +29,9 @@ export class MealCreateComponent {
       title:this.title,
       description:this.description,
        // Split comma-separated tags into an array and trim whitespace
-      dietaryTags: this.dietaryTags ? this.dietaryTags.split(',').map(s=>s.trim()) : [],
+      dietary: this.dietary ? this.dietary.split(',').map(s=>s.trim()) : [],
       // Force number to avoid sending a string to the API
-      portionsAvailable: Number(this.portionsAvailable || 0)
+      qtyAvailable: Number(this.qtyAvailable || 0)
     };
     // Subscribe to the HTTP Observable; stash either the response or error to display
     this.meals.create(payload).subscribe({ next:r=>this.result=r, error:e=>this.result=e?.error||e });

@@ -8,8 +8,8 @@ export interface Meal {
   _id?: string;            // Mongo-style id assigned by backend
   title: string;           // Name of the meal (required by backend)
   description?: string;    // Optional text about the meal
-  dietaryTags?: string[];  // e.g., ["vegan", "gluten-free"]
-  portionsAvailable?: number; // Inventory/portion count
+  dietary?: string[];  // e.g., ["vegan", "gluten-free"]
+  qtyAvailable?: number; // Inventory/portion count
   deliveryDays?: string[];    // Days of week this meal can be delivered
   provider?: string;          // Member/organisation providing the meal
 }
